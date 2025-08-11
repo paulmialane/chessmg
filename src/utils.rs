@@ -1,7 +1,6 @@
 use crate::bitboard::Bitboard;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-use std::str::FromStr;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Color {
@@ -713,6 +712,7 @@ impl Square {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         match s {
             "a1" => Square::A1,

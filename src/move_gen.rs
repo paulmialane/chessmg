@@ -32,7 +32,7 @@ impl Move {
                     print!(". ");
                 }
             }
-            println!("");
+            println!();
         }
         println!("  a b c d e f g h");
         print!("");
@@ -53,7 +53,7 @@ impl<'a> MoveGen<'a> {
 
     pub fn new(board: &'a Board) -> Self {
         Self {
-            board: board,
+            board,
             pseudo_move_list: Vec::with_capacity(500),
             legal_move_list: Vec::with_capacity(500),
         }
@@ -784,21 +784,22 @@ impl<'a> MoveGen<'a> {
             let no_piece_on_f1 = self.board.get_piece(Square::F1).is_none();
             let no_piece_on_g1 = self.board.get_piece(Square::G1).is_none();
             let piece_on_h1 = self.board.get_piece(Square::H1);
-            if no_piece_on_g1 && no_piece_on_f1 {
-                if piece_on_h1.is_some_and(|p| p.color == Color::White && p.kind == Kind::Rook) {
-                    let m = Move {
-                        piece_kind: Kind::King,
-                        piece_color: Color::White,
-                        from: Square::E1,
-                        to: Square::G1,
-                        casteling: true,
-                        promoting_piece: None,
-                        double_push: false,
-                        en_passant: false,
-                        captured_piece: None,
-                    };
-                    self.pseudo_move_list.push(m);
-                }
+            if no_piece_on_g1
+                && no_piece_on_f1
+                && piece_on_h1.is_some_and(|p| p.color == Color::White && p.kind == Kind::Rook)
+            {
+                let m = Move {
+                    piece_kind: Kind::King,
+                    piece_color: Color::White,
+                    from: Square::E1,
+                    to: Square::G1,
+                    casteling: true,
+                    promoting_piece: None,
+                    double_push: false,
+                    en_passant: false,
+                    captured_piece: None,
+                };
+                self.pseudo_move_list.push(m);
             }
         }
         if self.board.casteling_rights.white_queenside {
@@ -806,21 +807,23 @@ impl<'a> MoveGen<'a> {
             let no_piece_on_c1 = self.board.get_piece(Square::C1).is_none();
             let no_piece_on_d1 = self.board.get_piece(Square::D1).is_none();
             let piece_on_a1 = self.board.get_piece(Square::A1);
-            if no_piece_on_b1 && no_piece_on_c1 && no_piece_on_d1 {
-                if piece_on_a1.is_some_and(|p| p.color == Color::White && p.kind == Kind::Rook) {
-                    let m = Move {
-                        piece_kind: Kind::King,
-                        piece_color: Color::White,
-                        from: Square::E1,
-                        to: Square::C1,
-                        casteling: true,
-                        promoting_piece: None,
-                        double_push: false,
-                        en_passant: false,
-                        captured_piece: None,
-                    };
-                    self.pseudo_move_list.push(m);
-                }
+            if no_piece_on_b1
+                && no_piece_on_c1
+                && no_piece_on_d1
+                && piece_on_a1.is_some_and(|p| p.color == Color::White && p.kind == Kind::Rook)
+            {
+                let m = Move {
+                    piece_kind: Kind::King,
+                    piece_color: Color::White,
+                    from: Square::E1,
+                    to: Square::C1,
+                    casteling: true,
+                    promoting_piece: None,
+                    double_push: false,
+                    en_passant: false,
+                    captured_piece: None,
+                };
+                self.pseudo_move_list.push(m);
             }
         }
     }
@@ -895,21 +898,22 @@ impl<'a> MoveGen<'a> {
             let no_piece_on_f8 = self.board.get_piece(Square::F8).is_none();
             let no_piece_on_g8 = self.board.get_piece(Square::G8).is_none();
             let piece_on_h8 = self.board.get_piece(Square::H8);
-            if no_piece_on_g8 && no_piece_on_f8 {
-                if piece_on_h8.is_some_and(|p| p.color == Color::Black && p.kind == Kind::Rook) {
-                    let m = Move {
-                        piece_kind: Kind::King,
-                        piece_color: Color::Black,
-                        from: Square::E8,
-                        to: Square::G8,
-                        casteling: true,
-                        promoting_piece: None,
-                        double_push: false,
-                        en_passant: false,
-                        captured_piece: None,
-                    };
-                    self.pseudo_move_list.push(m);
-                }
+            if no_piece_on_g8
+                && no_piece_on_f8
+                && piece_on_h8.is_some_and(|p| p.color == Color::Black && p.kind == Kind::Rook)
+            {
+                let m = Move {
+                    piece_kind: Kind::King,
+                    piece_color: Color::Black,
+                    from: Square::E8,
+                    to: Square::G8,
+                    casteling: true,
+                    promoting_piece: None,
+                    double_push: false,
+                    en_passant: false,
+                    captured_piece: None,
+                };
+                self.pseudo_move_list.push(m);
             }
         }
         if self.board.casteling_rights.black_queenside {
@@ -917,21 +921,23 @@ impl<'a> MoveGen<'a> {
             let no_piece_on_c8 = self.board.get_piece(Square::C8).is_none();
             let no_piece_on_d8 = self.board.get_piece(Square::D8).is_none();
             let piece_on_a8 = self.board.get_piece(Square::A8);
-            if no_piece_on_b8 && no_piece_on_c8 && no_piece_on_d8 {
-                if piece_on_a8.is_some_and(|p| p.color == Color::Black && p.kind == Kind::Rook) {
-                    let m = Move {
-                        piece_kind: Kind::King,
-                        piece_color: Color::Black,
-                        from: Square::E8,
-                        to: Square::C8,
-                        casteling: true,
-                        promoting_piece: None,
-                        double_push: false,
-                        en_passant: false,
-                        captured_piece: None,
-                    };
-                    self.pseudo_move_list.push(m);
-                }
+            if no_piece_on_b8
+                && no_piece_on_c8
+                && no_piece_on_d8
+                && piece_on_a8.is_some_and(|p| p.color == Color::Black && p.kind == Kind::Rook)
+            {
+                let m = Move {
+                    piece_kind: Kind::King,
+                    piece_color: Color::Black,
+                    from: Square::E8,
+                    to: Square::C8,
+                    casteling: true,
+                    promoting_piece: None,
+                    double_push: false,
+                    en_passant: false,
+                    captured_piece: None,
+                };
+                self.pseudo_move_list.push(m);
             }
         }
     }
@@ -963,7 +969,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_white_knight_moves(&mut self) {
-        let mut knights_bitboard = self.board.white_knight.bitboard.clone();
+        let mut knights_bitboard = self.board.white_knight.bitboard;
         while knights_bitboard != 0 {
             let knight_pos = knights_bitboard.pop_lsb().unwrap();
             let knight_bitboard = square_mask(Square::from_usize(knight_pos));
@@ -1013,7 +1019,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_black_knight_moves(&mut self) {
-        let mut knights_bitboard = self.board.black_knight.bitboard.clone();
+        let mut knights_bitboard = self.board.black_knight.bitboard;
         while knights_bitboard != 0 {
             let knight_pos = knights_bitboard.pop_lsb().unwrap();
             let knight_bitboard = square_mask(Square::from_usize(knight_pos));
@@ -1063,7 +1069,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_white_bishop_moves(&mut self) {
-        let mut bishops = self.board.white_bishop.bitboard.clone();
+        let mut bishops = self.board.white_bishop.bitboard;
         while bishops != 0 {
             let bishop_pos = bishops.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1093,7 +1099,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_black_bishop_moves(&mut self) {
-        let mut bishops = self.board.black_bishop.bitboard.clone();
+        let mut bishops = self.board.black_bishop.bitboard;
         while bishops != 0 {
             let bishop_pos = bishops.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1123,7 +1129,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_white_rook_moves(&mut self) {
-        let mut rooks = self.board.white_rook.bitboard.clone();
+        let mut rooks = self.board.white_rook.bitboard;
         while rooks != 0 {
             let rook_pos = rooks.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1153,7 +1159,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_black_rook_moves(&mut self) {
-        let mut rooks = self.board.black_rook.bitboard.clone();
+        let mut rooks = self.board.black_rook.bitboard;
         while rooks != 0 {
             let rook_pos = rooks.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1183,7 +1189,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_white_queen_moves(&mut self) {
-        let mut queens = self.board.white_queen.bitboard.clone();
+        let mut queens = self.board.white_queen.bitboard;
         while queens != 0 {
             let queen_pos = queens.pop_lsb().unwrap();
             let rook_blockers = self.board.all_pieces()
@@ -1236,7 +1242,7 @@ impl<'a> MoveGen<'a> {
     }
 
     pub fn gen_black_queen_moves(&mut self) {
-        let mut queens = self.board.black_queen.bitboard.clone();
+        let mut queens = self.board.black_queen.bitboard;
         while queens != 0 {
             let queen_pos = queens.pop_lsb().unwrap();
             let rook_blockers = self.board.all_pieces()
@@ -1311,7 +1317,7 @@ impl<'a> MoveGen<'a> {
 
         let king_attacks = spot1 | spot2 | spot3 | spot4 | spot5 | spot6 | spot7 | spot8;
         let mut knight_attacks = Bitboard(0);
-        let mut knights = self.board.white_knight.bitboard.clone();
+        let mut knights = self.board.white_knight.bitboard;
         while knights != 0 {
             let knight_pos = knights.pop_lsb().unwrap();
             let moves = self.gen_knight_moves(square_mask(Square::from_usize(knight_pos)));
@@ -1320,7 +1326,7 @@ impl<'a> MoveGen<'a> {
 
         let mut bishop_attacks = Bitboard(0);
 
-        let mut bishops = self.board.white_bishop.bitboard.clone();
+        let mut bishops = self.board.white_bishop.bitboard;
         while bishops != 0 {
             let bishop_pos = bishops.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1331,7 +1337,7 @@ impl<'a> MoveGen<'a> {
         }
 
         let mut rook_attacks = Bitboard(0);
-        let mut rooks = self.board.white_rook.bitboard.clone();
+        let mut rooks = self.board.white_rook.bitboard;
         while rooks != 0 {
             let rook_pos = rooks.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1342,7 +1348,7 @@ impl<'a> MoveGen<'a> {
         }
 
         let mut queen_attacks = Bitboard(0);
-        let mut queens = self.board.white_queen.bitboard.clone();
+        let mut queens = self.board.white_queen.bitboard;
         while queens != 0 {
             let queen_pos = queens.pop_lsb().unwrap();
             let rook_blockers = self.board.all_pieces()
@@ -1356,7 +1362,7 @@ impl<'a> MoveGen<'a> {
             queen_attacks = queen_attacks | rook_moves | bishop_moves;
         }
 
-        return position
+        position
             & (pawn_left_attacks
                 | pawn_right_attacks
                 | king_attacks
@@ -1364,7 +1370,7 @@ impl<'a> MoveGen<'a> {
                 | knight_attacks
                 | rook_attacks
                 | queen_attacks)
-            != 0;
+            != 0
     }
 
     fn is_square_under_black_attack(&self, square: Square) -> bool {
@@ -1390,7 +1396,7 @@ impl<'a> MoveGen<'a> {
 
         let king_attacks = spot1 | spot2 | spot3 | spot4 | spot5 | spot6 | spot7 | spot8;
         let mut knight_attacks = Bitboard(0);
-        let mut knights = self.board.black_knight.bitboard.clone();
+        let mut knights = self.board.black_knight.bitboard;
         while knights != 0 {
             let knight_pos = knights.pop_lsb().unwrap();
             let moves = self.gen_knight_moves(square_mask(Square::from_usize(knight_pos)));
@@ -1399,7 +1405,7 @@ impl<'a> MoveGen<'a> {
 
         let mut bishop_attacks = Bitboard(0);
 
-        let mut bishops = self.board.black_bishop.bitboard.clone();
+        let mut bishops = self.board.black_bishop.bitboard;
         while bishops != 0 {
             let bishop_pos = bishops.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1410,7 +1416,7 @@ impl<'a> MoveGen<'a> {
         }
 
         let mut rook_attacks = Bitboard(0);
-        let mut rooks = self.board.black_rook.bitboard.clone();
+        let mut rooks = self.board.black_rook.bitboard;
         while rooks != 0 {
             let rook_pos = rooks.pop_lsb().unwrap();
             let blockers = self.board.all_pieces()
@@ -1421,7 +1427,7 @@ impl<'a> MoveGen<'a> {
         }
 
         let mut queen_attacks = Bitboard(0);
-        let mut queens = self.board.black_queen.bitboard.clone();
+        let mut queens = self.board.black_queen.bitboard;
         while queens != 0 {
             let queen_pos = queens.pop_lsb().unwrap();
             let rook_blockers = self.board.all_pieces()
@@ -1435,7 +1441,7 @@ impl<'a> MoveGen<'a> {
             queen_attacks = queen_attacks | rook_moves | bishop_moves;
         }
 
-        return position
+        position
             & (pawn_left_attacks
                 | pawn_right_attacks
                 | king_attacks
@@ -1443,7 +1449,7 @@ impl<'a> MoveGen<'a> {
                 | knight_attacks
                 | rook_attacks
                 | queen_attacks)
-            != 0;
+            != 0
     }
 
     pub fn is_square_under_attack(&self, square: Square, by: Color) -> bool {

@@ -175,7 +175,7 @@ impl Board {
                 let king_square =
                     Square::from_usize(self.white_king.bitboard.clone().pop_lsb().unwrap());
                 let mg = MoveGen {
-                    board: &self,
+                    board: self,
                     pseudo_move_list: Vec::new(),
                     legal_move_list: Vec::new(),
                 };
@@ -185,7 +185,7 @@ impl Board {
                 let king_square =
                     Square::from_usize(self.black_king.bitboard.clone().pop_lsb().unwrap());
                 let mg = MoveGen {
-                    board: &self,
+                    board: self,
                     pseudo_move_list: Vec::new(),
                     legal_move_list: Vec::new(),
                 };
@@ -304,7 +304,7 @@ impl Board {
         }
 
         // Promotion
-        if !m.promoting_piece.is_none() {
+        if m.promoting_piece.is_some() {
             let piece_kind = m.promoting_piece.unwrap();
             let new_piece = match (piece_kind, m.piece_color) {
                 (Kind::Pawn, Color::White) => &mut self.white_pawn,
