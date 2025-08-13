@@ -1481,7 +1481,7 @@ impl<'a> MoveGen<'a> {
 mod tests {
     use super::*;
     fn wrapper(fen: &str, n_move: usize) {
-        let board = Board::from_fen(fen);
+        let board = Board::from_fen(fen).unwrap();
         let mut mg = MoveGen::new(&board);
         mg.gen_legal_moves();
         let v = mg.get_legal_moves();
