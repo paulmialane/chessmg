@@ -1,17 +1,13 @@
-pub mod bitboard;
-pub use bitboard::Bitboard;
-
+#![warn(clippy::pedantic)]
+#![allow(clippy::similar_names, clippy::must_use_candidate)]
+mod bitboard;
+mod errors;
+mod magic;
 mod piece;
-pub use piece::Piece;
-
-pub mod utils;
-pub use utils::{Color, Kind};
+mod utils;
 
 pub mod board;
 pub use board::Board;
 
 pub mod move_gen;
-pub use move_gen::Move;
-
-pub mod magic;
-pub use magic::MagicEntry;
+pub use move_gen::MoveGen;

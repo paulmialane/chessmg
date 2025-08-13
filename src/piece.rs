@@ -1,7 +1,6 @@
 use crate::bitboard::Bitboard;
 use crate::utils::{Color, Kind};
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub struct Piece {
     pub kind: Kind,
@@ -10,7 +9,6 @@ pub struct Piece {
 }
 
 impl Piece {
-    #[must_use]
     pub fn create_initial(kind: Kind, color: Color) -> Self {
         let bitboard = match (kind, color) {
             (Kind::Pawn, Color::White) => Bitboard(0xFF00),
@@ -34,7 +32,6 @@ impl Piece {
         }
     }
 
-    #[must_use]
     pub fn get_char(&self) -> char {
         match (self.kind, self.color) {
             (Kind::King, Color::White) => '♔',

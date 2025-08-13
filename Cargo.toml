@@ -10,6 +10,9 @@ repository = "https://github.com/paulmialane/chessmg"
 name = "chessmg"
 path = "src/lib.rs"
 
+[lints.clippy]
+similar_names = "allow"
+
 [dependencies]
 num = "0.4.3"
 num-derive = "0.4.2"

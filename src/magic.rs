@@ -10,7 +10,6 @@ use std::sync::LazyLock;
 
 type MagicIndex = u16;
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub struct MagicEntry {
     /// Maps magic indices to precomputed attack bitboards.
@@ -79,11 +78,11 @@ pub fn compute_attack(square: Square, blockers: Bitboard, kind: Kind) -> Bitboar
     };
 
     for &(dr, df) in directions {
-        let mut r = rank as i32 + dr;
-        let mut f = file as i32 + df;
+        let mut r = i32::from(rank) + dr;
+        let mut f = i32::from(file) + df;
 
         while (0..8).contains(&r) && (0..8).contains(&f) {
-            let sq = (r * 8 + f) as usize;
+            let sq = usize::try_from(r * 8 + f).unwrap();
             attacks = attacks | Bitboard(1u64 << sq);
             if (blockers >> sq) & 1 != 0 {
                 break; // ray blocked
@@ -99,8 +98,9 @@ pub fn compute_attack(square: Square, blockers: Bitboard, kind: Kind) -> Bitboar
 impl MagicEntry {
     // TODO: impl mul on &Bitbloard to avoid Copying
     // TODO: Test function
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn find_attack(&self, blockers: Bitboard) -> Bitboard {
-        let magic_index = ((blockers.wrapping_mul(self.magic)) >> self.shift) as u16;
+        let magic_index = u16::try_from((blockers.wrapping_mul(self.magic)) >> self.shift).unwrap();
         *self
             .attack_set
             .get(&magic_index)
@@ -127,7 +127,7 @@ impl MagicEntry {
             for &blockers in &permutations {
                 // Here, we use wrapping_mul because we're not sure the number can be represented
                 // as a u16 otherwise
-                let magic_index = ((blockers.wrapping_mul(magic)) >> shift) as u16;
+                let magic_index = u16::try_from((blockers.wrapping_mul(magic)) >> shift).unwrap();
                 let attack = compute_attack(square, blockers, kind);
 
                 if let Some(existing) = attack_set.get(&magic_index) {
@@ -146,18 +146,16 @@ impl MagicEntry {
                     attack_set,
                     default_attack,
                     magic,
-                    shift: shift as u8,
+                    shift: u8::try_from(shift).unwrap(),
                 };
             }
         }
     }
 }
 
-#[allow(dead_code)]
 pub static ROOK_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
     from_fn(|square| MagicEntry::generate(Square::from_usize(square), Kind::Rook))
 });
-#[allow(dead_code)]
 pub static BISHOP_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
     from_fn(|square| MagicEntry::generate(Square::from_usize(square), Kind::Bishop))
 });

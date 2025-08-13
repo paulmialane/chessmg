@@ -1,6 +1,8 @@
 use crate::bitboard::Bitboard;
+use crate::errors::ChessMgError;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use std::str::FromStr;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Color {
@@ -29,7 +31,6 @@ pub enum Kind {
 // 2 08 09 10 11 12 13 14 15
 // 1 00 01 02 03 04 05 06 07
 //   a  b  c  d  e  f  g  h
-#[allow(dead_code)]
 #[derive(FromPrimitive, Clone, Copy, Debug, PartialEq)]
 pub enum Square {
     A1 = 0,
@@ -105,7 +106,6 @@ pub enum Square {
     H8,
 }
 
-#[allow(dead_code)]
 pub const MASK_RANK: [Bitboard; 8] = [
     Bitboard(0xFF),
     Bitboard(0xFF << 8),
@@ -117,19 +117,6 @@ pub const MASK_RANK: [Bitboard; 8] = [
     Bitboard(0xFF << 56),
 ];
 
-#[allow(dead_code)]
-pub const MASK_FILE: [Bitboard; 8] = [
-    Bitboard(0x0101_0101_0101_0101),
-    Bitboard(0x0202_0202_0202_0202),
-    Bitboard(0x0404_0404_0404_0404),
-    Bitboard(0x0808_0808_0808_0808),
-    Bitboard(0x1010_1010_1010_1010),
-    Bitboard(0x2020_2020_2020_2020),
-    Bitboard(0x4040_4040_4040_4040),
-    Bitboard(0x8080_8080_8080_8080),
-];
-
-#[allow(dead_code)]
 pub const CLEAR_RANK: [Bitboard; 8] = [
     Bitboard(0xFFFF_FFFF_FFFF_FF00),
     Bitboard(0xFFFF_FFFF_FFFF_00FF),
@@ -141,7 +128,6 @@ pub const CLEAR_RANK: [Bitboard; 8] = [
     Bitboard(0x00FF_FFFF_FFFF_FFFF),
 ];
 
-#[allow(dead_code)]
 pub const CLEAR_FILE: [Bitboard; 8] = [
     Bitboard(0xFEFE_FEFE_FEFE_FEFE),
     Bitboard(0xFDFD_FDFD_FDFD_FDFD),
@@ -153,7 +139,6 @@ pub const CLEAR_FILE: [Bitboard; 8] = [
     Bitboard(0x7F7F_7F7F_7F7F_7F7F),
 ];
 
-#[allow(dead_code)]
 pub const NORTH_RAY: [Bitboard; 64] = [
     Bitboard(0x101_0101_0101_0100),
     Bitboard(0x202_0202_0202_0200),
@@ -221,7 +206,6 @@ pub const NORTH_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
 ];
 
-#[allow(dead_code)]
 pub const SOUTH_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
     Bitboard(0x0),
@@ -289,7 +273,6 @@ pub const SOUTH_RAY: [Bitboard; 64] = [
     Bitboard(0x80_8080_8080_8080),
 ];
 
-#[allow(dead_code)]
 pub const EAST_RAY: [Bitboard; 64] = [
     Bitboard(0xfe),
     Bitboard(0xfc),
@@ -357,7 +340,6 @@ pub const EAST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
 ];
 
-#[allow(dead_code)]
 pub const WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
     Bitboard(0x1),
@@ -425,7 +407,6 @@ pub const WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x7f00_0000_0000_0000),
 ];
 
-#[allow(dead_code)]
 pub const NORTH_EAST_RAY: [Bitboard; 64] = [
     Bitboard(0x8040_2010_0804_0200),
     Bitboard(0x80_4020_1008_0400),
@@ -493,7 +474,6 @@ pub const NORTH_EAST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
 ];
 
-#[allow(dead_code)]
 pub const NORTH_WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
     Bitboard(0x100),
@@ -561,7 +541,6 @@ pub const NORTH_WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
 ];
 
-#[allow(dead_code)]
 pub const SOUTH_EAST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
     Bitboard(0x0),
@@ -629,7 +608,6 @@ pub const SOUTH_EAST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
 ];
 
-#[allow(dead_code)]
 pub const SOUTH_WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x0),
     Bitboard(0x0),
@@ -697,6 +675,88 @@ pub const SOUTH_WEST_RAY: [Bitboard; 64] = [
     Bitboard(0x40_2010_0804_0201),
 ];
 
+impl FromStr for Square {
+    type Err = ChessMgError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "a1" => Ok(Square::A1),
+            "b1" => Ok(Square::B1),
+            "c1" => Ok(Square::C1),
+            "d1" => Ok(Square::D1),
+            "e1" => Ok(Square::E1),
+            "f1" => Ok(Square::F1),
+            "g1" => Ok(Square::G1),
+            "h1" => Ok(Square::H1),
+
+            "a2" => Ok(Square::A2),
+            "b2" => Ok(Square::B2),
+            "c2" => Ok(Square::C2),
+            "d2" => Ok(Square::D2),
+            "e2" => Ok(Square::E2),
+            "f2" => Ok(Square::F2),
+            "g2" => Ok(Square::G2),
+            "h2" => Ok(Square::H2),
+
+            "a3" => Ok(Square::A3),
+            "b3" => Ok(Square::B3),
+            "c3" => Ok(Square::C3),
+            "d3" => Ok(Square::D3),
+            "e3" => Ok(Square::E3),
+            "f3" => Ok(Square::F3),
+            "g3" => Ok(Square::G3),
+            "h3" => Ok(Square::H3),
+
+            "a4" => Ok(Square::A4),
+            "b4" => Ok(Square::B4),
+            "c4" => Ok(Square::C4),
+            "d4" => Ok(Square::D4),
+            "e4" => Ok(Square::E4),
+            "f4" => Ok(Square::F4),
+            "g4" => Ok(Square::G4),
+            "h4" => Ok(Square::H4),
+
+            "a5" => Ok(Square::A5),
+            "b5" => Ok(Square::B5),
+            "c5" => Ok(Square::C5),
+            "d5" => Ok(Square::D5),
+            "e5" => Ok(Square::E5),
+            "f5" => Ok(Square::F5),
+            "g5" => Ok(Square::G5),
+            "h5" => Ok(Square::H5),
+
+            "a6" => Ok(Square::A6),
+            "b6" => Ok(Square::B6),
+            "c6" => Ok(Square::C6),
+            "d6" => Ok(Square::D6),
+            "e6" => Ok(Square::E6),
+            "f6" => Ok(Square::F6),
+            "g6" => Ok(Square::G6),
+            "h6" => Ok(Square::H6),
+
+            "a7" => Ok(Square::A7),
+            "b7" => Ok(Square::B7),
+            "c7" => Ok(Square::C7),
+            "d7" => Ok(Square::D7),
+            "e7" => Ok(Square::E7),
+            "f7" => Ok(Square::F7),
+            "g7" => Ok(Square::G7),
+            "h7" => Ok(Square::H7),
+
+            "a8" => Ok(Square::A8),
+            "b8" => Ok(Square::B8),
+            "c8" => Ok(Square::C8),
+            "d8" => Ok(Square::D8),
+            "e8" => Ok(Square::E8),
+            "f8" => Ok(Square::F8),
+            "g8" => Ok(Square::G8),
+            "h8" => Ok(Square::H8),
+
+            _ => Err(ChessMgError::InvalidSquare),
+        }
+    }
+}
+
 impl Square {
     pub fn from_u8(integer: u8) -> Self {
         match FromPrimitive::from_u8(integer) {
@@ -711,89 +771,9 @@ impl Square {
             None => todo!("{integer}"),
         }
     }
-
-    #[allow(clippy::should_implement_trait)]
-    pub fn from_str(s: &str) -> Self {
-        match s {
-            "a1" => Square::A1,
-            "b1" => Square::B1,
-            "c1" => Square::C1,
-            "d1" => Square::D1,
-            "e1" => Square::E1,
-            "f1" => Square::F1,
-            "g1" => Square::G1,
-            "h1" => Square::H1,
-
-            "a2" => Square::A2,
-            "b2" => Square::B2,
-            "c2" => Square::C2,
-            "d2" => Square::D2,
-            "e2" => Square::E2,
-            "f2" => Square::F2,
-            "g2" => Square::G2,
-            "h2" => Square::H2,
-
-            "a3" => Square::A3,
-            "b3" => Square::B3,
-            "c3" => Square::C3,
-            "d3" => Square::D3,
-            "e3" => Square::E3,
-            "f3" => Square::F3,
-            "g3" => Square::G3,
-            "h3" => Square::H3,
-
-            "a4" => Square::A4,
-            "b4" => Square::B4,
-            "c4" => Square::C4,
-            "d4" => Square::D4,
-            "e4" => Square::E4,
-            "f4" => Square::F4,
-            "g4" => Square::G4,
-            "h4" => Square::H4,
-
-            "a5" => Square::A5,
-            "b5" => Square::B5,
-            "c5" => Square::C5,
-            "d5" => Square::D5,
-            "e5" => Square::E5,
-            "f5" => Square::F5,
-            "g5" => Square::G5,
-            "h5" => Square::H5,
-
-            "a6" => Square::A6,
-            "b6" => Square::B6,
-            "c6" => Square::C6,
-            "d6" => Square::D6,
-            "e6" => Square::E6,
-            "f6" => Square::F6,
-            "g6" => Square::G6,
-            "h6" => Square::H6,
-
-            "a7" => Square::A7,
-            "b7" => Square::B7,
-            "c7" => Square::C7,
-            "d7" => Square::D7,
-            "e7" => Square::E7,
-            "f7" => Square::F7,
-            "g7" => Square::G7,
-            "h7" => Square::H7,
-
-            "a8" => Square::A8,
-            "b8" => Square::B8,
-            "c8" => Square::C8,
-            "d8" => Square::D8,
-            "e8" => Square::E8,
-            "f8" => Square::F8,
-            "g8" => Square::G8,
-            "h8" => Square::H8,
-
-            _ => panic!(),
-        }
-    }
 }
 
-#[allow(dead_code)]
-#[allow(clippy::struct_excessive_bools)]
+#[allow(clippy::struct_excessive_bools, reason = "I now what I do")]
 #[derive(Clone)]
 pub struct Casteling {
     // This truct tells whether the king of a given color can
@@ -817,7 +797,6 @@ impl Default for Casteling {
     }
 }
 
-#[allow(dead_code)]
 pub fn square_mask(square: Square) -> Bitboard {
     Bitboard(1 << square as u8)
 }

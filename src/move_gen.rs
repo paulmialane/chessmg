@@ -5,7 +5,6 @@ use crate::magic::{
 };
 use crate::utils::{square_mask, Color, Kind, Square, CLEAR_FILE, CLEAR_RANK, MASK_RANK};
 
-#[allow(dead_code)]
 pub struct Move {
     pub piece_kind: Kind,
     pub piece_color: Color,
@@ -19,6 +18,7 @@ pub struct Move {
 }
 
 impl Move {
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn display(&self) {
         for rank in (0..8).rev() {
             print!("{} ", rank + 1);
@@ -39,14 +39,12 @@ impl Move {
     }
 }
 
-#[allow(dead_code)]
 pub struct MoveGen<'a> {
     pub board: &'a Board,
     pub pseudo_move_list: Vec<Move>,
     pub legal_move_list: Vec<Move>,
 }
 
-#[allow(dead_code)]
 impl<'a> MoveGen<'a> {
     // The only pub function should be the following
     // For debuggind purposes, all functions are now pub
@@ -63,6 +61,7 @@ impl<'a> MoveGen<'a> {
         &self.legal_move_list
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_legal_moves(&mut self) {
         self.gen_pseudo_moves();
         let old_items = std::mem::take(&mut self.pseudo_move_list);
@@ -134,6 +133,7 @@ impl<'a> MoveGen<'a> {
         self.gen_black_king_moves();
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_pawn_single_move(&mut self) {
         let mut moved_pawns = self.board.white_pawn.bitboard << 8;
         let free_squares = !self.board.all_pieces();
@@ -210,6 +210,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_pawn_double_move(&mut self) {
         let free_squares: Bitboard = !self.board.all_pieces();
         let single_pushes: Bitboard = (self.board.white_pawn.bitboard << 8) & free_squares;
@@ -231,6 +232,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_pawn_left_attack(&mut self) {
         let mut left_regular_attacks =
             (self.board.white_pawn.bitboard << 7) & self.board.all_black_pieces() & CLEAR_FILE[7];
@@ -324,6 +326,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_pawn_right_attack(&mut self) {
         let mut right_regular_attacks =
             (self.board.white_pawn.bitboard << 9) & self.board.all_black_pieces() & CLEAR_FILE[0];
@@ -417,6 +420,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_pawn_single_move(&mut self) {
         let mut moved_pawns = self.board.black_pawn.bitboard >> 8;
         let free_squares = !self.board.all_pieces();
@@ -493,6 +497,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_pawn_double_move(&mut self) {
         let free_squares: Bitboard = !self.board.all_pieces();
         let single_pushes: Bitboard = (self.board.black_pawn.bitboard >> 8) & free_squares;
@@ -514,6 +519,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_pawn_left_attack(&mut self) {
         let mut left_regular_attacks =
             (self.board.black_pawn.bitboard >> 7) & self.board.all_white_pieces() & CLEAR_FILE[0];
@@ -607,6 +613,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_pawn_right_attack(&mut self) {
         let mut left_regular_attacks =
             (self.board.black_pawn.bitboard >> 9) & self.board.all_white_pieces() & CLEAR_FILE[7];
@@ -714,6 +721,7 @@ impl<'a> MoveGen<'a> {
         self.gen_black_pawn_right_attack();
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_king_moves(&mut self) {
         // Square nums
         //     . . . . .
@@ -828,6 +836,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_king_moves(&mut self) {
         // Square nums
         //     . . . . .
@@ -968,6 +977,7 @@ impl<'a> MoveGen<'a> {
         spot1 | spot2 | spot3 | spot4 | spot5 | spot6 | spot7 | spot8
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_knight_moves(&mut self) {
         let mut knights_bitboard = self.board.white_knight.bitboard;
         while knights_bitboard != 0 {
@@ -1018,6 +1028,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_knight_moves(&mut self) {
         let mut knights_bitboard = self.board.black_knight.bitboard;
         while knights_bitboard != 0 {
@@ -1068,6 +1079,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_bishop_moves(&mut self) {
         let mut bishops = self.board.white_bishop.bitboard;
         while bishops != 0 {
@@ -1098,6 +1110,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_bishop_moves(&mut self) {
         let mut bishops = self.board.black_bishop.bitboard;
         while bishops != 0 {
@@ -1128,6 +1141,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_rook_moves(&mut self) {
         let mut rooks = self.board.white_rook.bitboard;
         while rooks != 0 {
@@ -1158,6 +1172,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_rook_moves(&mut self) {
         let mut rooks = self.board.black_rook.bitboard;
         while rooks != 0 {
@@ -1188,6 +1203,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_white_queen_moves(&mut self) {
         let mut queens = self.board.white_queen.bitboard;
         while queens != 0 {
@@ -1241,6 +1257,7 @@ impl<'a> MoveGen<'a> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
     pub fn gen_black_queen_moves(&mut self) {
         let mut queens = self.board.black_queen.bitboard;
         while queens != 0 {
@@ -1464,7 +1481,7 @@ impl<'a> MoveGen<'a> {
 mod tests {
     use super::*;
     fn wrapper(fen: &str, n_move: usize) {
-        let board = Board::from_fen(fen.to_string());
+        let board = Board::from_fen(fen);
         let mut mg = MoveGen::new(&board);
         mg.gen_legal_moves();
         let v = mg.get_legal_moves();
@@ -1473,120 +1490,65 @@ mod tests {
 
     #[test]
     fn test_king_center() {
-        let board = Board::from_fen("k7/8/8/8/3K4/8/8/8 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 8);
+        wrapper("k7/8/8/8/3K4/8/8/8 w - - 0 1", 8);
     }
 
     #[test]
     fn test_king_a1() {
-        let board = Board::from_fen("k7/8/8/8/8/8/8/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 3);
+        wrapper("k7/8/8/8/8/8/8/K7 w - - 0 1", 3);
     }
     #[test]
     fn test_king_h1() {
-        let board = Board::from_fen("k7/8/8/8/8/8/8/7K w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 3);
+        wrapper("k7/8/8/8/8/8/8/7K w - - 0 1", 3);
     }
     #[test]
     fn test_king_a8() {
-        let board = Board::from_fen("K7/8/8/3k4/8/8/8/8 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 3);
+        wrapper("K7/8/8/3k4/8/8/8/8 w - - 0 1", 3);
     }
     #[test]
     fn test_king_h8() {
-        let board = Board::from_fen("7K/8/8/3k4/8/8/8/8 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 3);
+        wrapper("7K/8/8/3k4/8/8/8/8 w - - 0 1", 3);
     }
 
     #[test]
     fn test_king_face_to_face() {
-        let board = Board::from_fen("8/8/8/3k4/8/3K4/8/8 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 5);
+        wrapper("8/8/8/3k4/8/3K4/8/8 w - - 0 1", 5);
     }
 
     #[test]
     fn test_king_capture() {
-        let board = Board::from_fen("k7/8/8/8/2b1r3/3K4/8/8 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 4);
+        wrapper("k7/8/8/8/2b1r3/3K4/8/8 w - - 0 1", 4);
     }
 
     #[test]
     fn test_white_pawn_double_push() {
-        let board = Board::from_fen("k7/8/8/8/8/8/4P3/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 5);
+        wrapper("k7/8/8/8/8/8/4P3/K7 w - - 0 1", 5);
     }
 
     #[test]
     fn test_white_pawn_single_push() {
-        let board = Board::from_fen("k7/8/8/8/4P3/8/8/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 4);
+        wrapper("k7/8/8/8/4P3/8/8/K7 w - - 0 1", 4);
     }
 
     #[test]
     fn test_white_pawn_double_push_opposition() {
-        let board = Board::from_fen("k7/8/8/8/4p3/8/4P3/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 4);
-
-        let board = Board::from_fen("k7/8/8/4p3/8/8/4P3/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 5);
+        wrapper("k7/8/8/8/4p3/8/4P3/K7 w - - 0 1", 4);
+        wrapper("k7/8/8/4p3/8/8/4P3/K7 w - - 0 1", 5);
     }
+
     #[test]
     fn test_white_pawn_single_push_opposition() {
-        let board = Board::from_fen("k7/8/8/4p3/4P3/8/8/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 3);
+        wrapper("k7/8/8/4p3/4P3/8/8/K7 w - - 0 1", 3);
     }
 
     #[test]
     fn test_white_pawn_left_attack() {
-        let board = Board::from_fen("k7/8/8/8/3p4/4P3/8/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 5);
+        wrapper("k7/8/8/8/3p4/4P3/8/K7 w - - 0 1", 5);
     }
+
     #[test]
     fn test_white_pawn_right_attack() {
-        let board = Board::from_fen("k7/8/8/8/5p2/4P3/8/K7 w - - 0 1".to_string());
-        let mut mg = MoveGen::new(&board);
-        mg.gen_legal_moves();
-        let v = mg.get_legal_moves();
-        assert_eq!(v.len(), 5);
+        wrapper("k7/8/8/8/5p2/4P3/8/K7 w - - 0 1", 5);
     }
 
     #[test]

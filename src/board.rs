@@ -1,10 +1,12 @@
 use crate::bitboard::Bitboard;
+use crate::errors::ChessMgError;
+use crate::errors::ChessMgError::InvalidFEN;
 use crate::move_gen::{Move, MoveGen};
 use crate::piece::Piece;
 use crate::utils::{square_mask, Casteling, Color, Kind, Square};
 use std::fmt;
+use std::str::FromStr;
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub struct Board {
     // Who is it to move (White/Black)
@@ -109,6 +111,82 @@ impl Board {
         }
     }
 
+    fn zero() -> Self {
+        Board {
+            to_move: Color::White,
+            white_pawn: Piece {
+                kind: Kind::Pawn,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+            white_knight: Piece {
+                kind: Kind::Knight,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+            white_bishop: Piece {
+                kind: Kind::Bishop,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+            white_rook: Piece {
+                kind: Kind::Rook,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+            white_queen: Piece {
+                kind: Kind::Queen,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+            white_king: Piece {
+                kind: Kind::King,
+                color: Color::White,
+                bitboard: Bitboard(0),
+            },
+
+            black_pawn: Piece {
+                kind: Kind::Pawn,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+            black_knight: Piece {
+                kind: Kind::Knight,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+            black_bishop: Piece {
+                kind: Kind::Bishop,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+            black_rook: Piece {
+                kind: Kind::Rook,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+            black_queen: Piece {
+                kind: Kind::Queen,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+            black_king: Piece {
+                kind: Kind::King,
+                color: Color::Black,
+                bitboard: Bitboard(0),
+            },
+
+            casteling_rights: Casteling {
+                white_kingside: false,
+                white_queenside: false,
+                black_kingside: false,
+                black_queenside: false,
+            },
+
+            en_passant: None,
+        }
+    }
+
     pub fn all_white_pieces(&self) -> Bitboard {
         self.white_pawn.bitboard
             | self.white_knight.bitboard
@@ -169,6 +247,7 @@ impl Board {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "It is not suppose to panic")]
     pub fn is_in_check(&self, color: Color) -> bool {
         match color {
             Color::White => {
@@ -194,6 +273,8 @@ impl Board {
         }
     }
 
+    #[allow(clippy::missing_panics_doc, reason = "It is not suppose to panic")]
+    #[allow(clippy::too_many_lines)]
     pub fn do_move(&mut self, m: &Move) {
         // Determine the piece to modify
         let piece = match (m.piece_kind, m.piece_color) {
@@ -363,88 +444,23 @@ impl Board {
         }
     }
 
-    pub fn from_fen(fen: String) -> Self {
+    #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
+    /// # Errors
+    /// TODO
+    pub fn from_fen(fen: &str) -> Result<Self, ChessMgError> {
         // start with zeroed bitboards and default values
-        let mut board = Board {
-            to_move: Color::White,
-            white_pawn: Piece {
-                kind: Kind::Pawn,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-            white_knight: Piece {
-                kind: Kind::Knight,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-            white_bishop: Piece {
-                kind: Kind::Bishop,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-            white_rook: Piece {
-                kind: Kind::Rook,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-            white_queen: Piece {
-                kind: Kind::Queen,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-            white_king: Piece {
-                kind: Kind::King,
-                color: Color::White,
-                bitboard: Bitboard(0),
-            },
-
-            black_pawn: Piece {
-                kind: Kind::Pawn,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-            black_knight: Piece {
-                kind: Kind::Knight,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-            black_bishop: Piece {
-                kind: Kind::Bishop,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-            black_rook: Piece {
-                kind: Kind::Rook,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-            black_queen: Piece {
-                kind: Kind::Queen,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-            black_king: Piece {
-                kind: Kind::King,
-                color: Color::Black,
-                bitboard: Bitboard(0),
-            },
-
-            casteling_rights: Casteling {
-                white_kingside: false,
-                white_queenside: false,
-                black_kingside: false,
-                black_queenside: false,
-            },
-
-            en_passant: None,
-        };
+        let mut board = Board::zero();
 
         let parts: Vec<&str> = fen.split_whitespace().collect();
-        assert!(parts.len() >= 4, "Invalid FEN: expected at least 4 fields");
+        if parts.len() < 4 {
+            return Err(InvalidFEN("Expected at least 4 fields".to_string()));
+        }
 
         // piece placement (ranks from 8 down to 1)
         let ranks: Vec<&str> = parts[0].split('/').collect();
-        assert!(ranks.len() == 8, "Invalid FEN: expected 8 ranks");
+        if ranks.len() != 8 {
+            return Err(InvalidFEN("Expected 8 ranks".to_string()));
+        }
 
         for (rank_idx, rank_str) in ranks.iter().enumerate() {
             let mut file: usize = 0;
@@ -452,9 +468,11 @@ impl Board {
                 if ch.is_ascii_digit() {
                     file += ch.to_digit(10).unwrap() as usize;
                 } else {
-                    assert!(file < 8, "Invalid FEN: too many squares in rank");
+                    if file >= 8 {
+                        return Err(InvalidFEN("Too many squares in rank".to_string()));
+                    }
                     // compute square index for a1 = 0 .. h8 = 63
-                    let sq = ((7 - rank_idx) * 8 + file) as u32;
+                    let sq = u32::try_from((7 - rank_idx) * 8 + file).unwrap();
                     let bit = 1u64 << sq;
 
                     match ch {
@@ -472,24 +490,22 @@ impl Board {
                         'q' => board.black_queen.bitboard.0 |= bit,
                         'k' => board.black_king.bitboard.0 |= bit,
 
-                        _ => panic!("Invalid FEN piece char: {}", ch),
+                        _ => return Err(InvalidFEN(format!("Invalid piece char {ch}"))),
                     }
 
                     file += 1;
                 }
             }
-            assert!(
-                file == 8,
-                "Invalid FEN: rank `{}` did not fill 8 files",
-                rank_str
-            );
+            if file != 8 {
+                return Err(InvalidFEN("A rank did not fill 8 files".to_string()));
+            }
         }
 
         // side to move
-        board.to_move = match parts[1] {
-            "w" => Color::White,
-            "b" => Color::Black,
-            _ => panic!("Invalid FEN active color"),
+        board.to_move = match parts.get(1) {
+            Some(&"w") => Color::White,
+            Some(&"b") => Color::Black,
+            _ => return Err(InvalidFEN("Active color is invalid".to_string())),
         };
 
         // castling rights
@@ -501,12 +517,13 @@ impl Board {
 
         // en passant target
         let ep = parts[3];
-        if ep != "-" {
-            board.en_passant = Some(Square::from_str(ep));
-        } else {
+        if ep == "-" {
             board.en_passant = None;
+        } else {
+            // TODO: return custom error
+            board.en_passant = Some(Square::from_str(ep)?);
         }
 
-        board
+        Ok(board)
     }
 }
