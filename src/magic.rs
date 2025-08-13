@@ -159,3 +159,13 @@ pub static ROOK_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
 pub static BISHOP_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
     from_fn(|square| MagicEntry::generate(Square::from_usize(square), Kind::Bishop))
 });
+
+/// Perform a dummt action on magics tables to load them
+/// (they are `LazyLock`, so they are filled with magic numbers
+/// the first time they are used)
+#[allow(clippy::missing_panics_doc, reason = "It is not suppose to panic")]
+pub fn load_magics() {
+    let a = ROOK_MAGICS[0].clone();
+    let b = BISHOP_MAGICS[0].clone();
+    assert!(!(a.default_attack == b.default_attack),);
+}
