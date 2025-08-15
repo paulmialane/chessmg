@@ -4,16 +4,19 @@ use crate::utils::{
     SOUTH_WEST_RAY, WEST_RAY,
 };
 use rand::random;
+use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 use std::array::from_fn;
-use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
 use std::sync::LazyLock;
 
 type MagicIndex = u16;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MagicEntry {
     /// Maps magic indices to precomputed attack bitboards.
-    pub attack_set: HashMap<MagicIndex, Bitboard>,
+    pub attack_set: FxHashMap<MagicIndex, Bitboard>,
 
     /// The default attack set when there are no blockers.
     pub default_attack: Bitboard,
@@ -99,6 +102,7 @@ impl MagicEntry {
     // TODO: impl mul on &Bitbloard to avoid Copying
     // TODO: Test function
     #[allow(clippy::missing_panics_doc, reason = "it is not supposed to panic")]
+    #[inline(always)]
     pub fn find_attack(&self, blockers: Bitboard) -> Bitboard {
         let magic_index = u16::try_from((blockers.wrapping_mul(self.magic)) >> self.shift).unwrap();
         *self
@@ -121,7 +125,7 @@ impl MagicEntry {
             // Can be replaced by loop to be sure
             // Here it is just to win time
             let magic = random::<u64>() & random::<u64>() & random::<u64>();
-            let mut attack_set = HashMap::new();
+            let mut attack_set = FxHashMap::default();
             let mut success = true;
 
             for &blockers in &permutations {
@@ -153,13 +157,6 @@ impl MagicEntry {
     }
 }
 
-pub static ROOK_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
-    from_fn(|square| MagicEntry::generate(Square::from_usize(square), Kind::Rook))
-});
-pub static BISHOP_MAGICS: LazyLock<[MagicEntry; 64]> = LazyLock::new(|| {
-    from_fn(|square| MagicEntry::generate(Square::from_usize(square), Kind::Bishop))
-});
-
 /// Perform a dummt action on magics tables to load them
 /// (they are `LazyLock`, so they are filled with magic numbers
 /// the first time they are used)
@@ -168,4 +165,30 @@ pub fn load_magics() {
     let a = ROOK_MAGICS[0].clone();
     let b = BISHOP_MAGICS[0].clone();
     assert!(!(a.default_attack == b.default_attack),);
+}
+
+pub static ROOK_MAGICS: LazyLock<[MagicEntry; 64]> =
+    LazyLock::new(|| load_or_generate("rook_magics.bin", Kind::Rook));
+pub static BISHOP_MAGICS: LazyLock<[MagicEntry; 64]> =
+    LazyLock::new(|| load_or_generate("bishop_magics.bin", Kind::Bishop));
+
+fn load_or_generate(path: &str, kind: Kind) -> [MagicEntry; 64] {
+    if Path::new(path).exists() {
+        // Decode into Vec<MagicEntry>, then convert to [MagicEntry; 64]
+        let bytes = fs::read(path).expect("Failed to read magic table file");
+        let (vec, _): (Vec<MagicEntry>, usize) =
+            bincode::serde::decode_from_slice(&bytes, bincode::config::standard())
+                .expect("Corrupted magic table file");
+        vec.try_into().expect("Decoded table must have length 64")
+    } else {
+        // Generate
+        let table: [MagicEntry; 64] =
+            from_fn(|sq| MagicEntry::generate(Square::from_usize(sq), kind));
+
+        // Encode from a slice to avoid the array bound
+        let bytes = bincode::serde::encode_to_vec(&table[..], bincode::config::standard())
+            .expect("Serialization failed");
+        fs::write(path, bytes).expect("Failed to write magic table file");
+        table
+    }
 }

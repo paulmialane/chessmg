@@ -9,5 +9,7 @@ mod utils;
 pub mod board;
 pub use board::Board;
 
-pub mod move_gen;
+mod move_gen;
 pub use move_gen::MoveGen;
+
+pub use magic::load_magics;

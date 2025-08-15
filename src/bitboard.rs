@@ -2,10 +2,11 @@
 //! representing the position of a kind of piece on a chessboard.
 //! Bitboards provide an efficient way to represent and manipulate chess positions
 //! through bitwise operations.
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::ops::{BitAnd, BitOr, BitXor, Mul, Not, Shl, Shr};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 /// A `Bitboard` is a 64-bit integer where each bit represents the presence or absence
 /// of a piece on a chessboard square.
 ///
