@@ -360,25 +360,33 @@ impl Board {
             // Make it disapear
 
             if m.en_passant {
-                enemy_piece.bitboard =
-                    enemy_piece.bitboard & !square_mask(self.en_passant.unwrap());
+                match enemy_color {
+                    Color::White => {
+                        enemy_piece.bitboard =
+                            enemy_piece.bitboard & !(square_mask(self.en_passant.unwrap()) << 8);
+                    }
+                    Color::Black => {
+                        enemy_piece.bitboard =
+                            enemy_piece.bitboard & !(square_mask(self.en_passant.unwrap()) >> 8);
+                    }
+                }
             } else {
                 enemy_piece.bitboard = enemy_piece.bitboard & !to_bitboard;
             }
 
             if enemy_piece.kind == Kind::Rook && enemy_piece.color == Color::White {
-                if m.to == Square::A1 {
+                if m.to == Square::H1 {
                     self.casteling_rights.white_kingside = false;
                 }
-                if m.to == Square::H1 {
+                if m.to == Square::A1 {
                     self.casteling_rights.white_queenside = false;
                 }
             }
             if enemy_piece.kind == Kind::Rook && enemy_piece.color == Color::Black {
-                if m.to == Square::A8 {
+                if m.to == Square::H8 {
                     self.casteling_rights.black_kingside = false;
                 }
-                if m.to == Square::H8 {
+                if m.to == Square::A8 {
                     self.casteling_rights.black_queenside = false;
                 }
             }
