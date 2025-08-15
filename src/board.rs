@@ -534,4 +534,128 @@ impl Board {
 
         Ok(board)
     }
+
+    pub fn to_fen(&self) -> String {
+        let mut fen = String::new();
+
+        // 1. Piece placement
+        for rank in (0..8).rev() {
+            // ranks 8..1
+            let mut empty = 0;
+            for file in 0..8 {
+                // files a..h
+                let square = rank * 8 + file;
+                let piece_char = Self::piece_at_square(self, square);
+                if let Some(c) = piece_char {
+                    if empty > 0 {
+                        fen.push_str(&empty.to_string());
+                        empty = 0;
+                    }
+                    fen.push(c);
+                } else {
+                    empty += 1;
+                }
+            }
+            if empty > 0 {
+                fen.push_str(&empty.to_string());
+            }
+            if rank != 0 {
+                fen.push('/');
+            }
+        }
+
+        // 2. Active color
+        fen.push(' ');
+        fen.push(match self.to_move {
+            Color::White => 'w',
+            Color::Black => 'b',
+        });
+
+        // 3. Castling rights
+        fen.push(' ');
+        let mut castling = String::new();
+        if self.casteling_rights.white_kingside {
+            castling.push('K');
+        }
+        if self.casteling_rights.white_queenside {
+            castling.push('Q');
+        }
+        if self.casteling_rights.black_kingside {
+            castling.push('k');
+        }
+        if self.casteling_rights.black_queenside {
+            castling.push('q');
+        }
+        if castling.is_empty() {
+            castling.push('-');
+        }
+        fen.push_str(&castling);
+
+        // 4. En passant target square
+        fen.push(' ');
+        if let Some(square) = self.en_passant {
+            fen.push_str(square.square_to_str()); // you need a Square -> algebraic conversion
+        } else {
+            fen.push('-');
+        }
+
+        // 5. Halfmove clock (optional, set 0)
+        fen.push_str(" 0");
+
+        // 6. Fullmove number (optional, set 1)
+        fen.push_str(" 1");
+
+        fen
+    }
+
+    fn piece_at_square(board: &Board, square: usize) -> Option<char> {
+        let pieces = [
+            board.white_pawn.clone(),
+            board.white_knight.clone(),
+            board.white_bishop.clone(),
+            board.white_rook.clone(),
+            board.white_queen.clone(),
+            board.white_king.clone(),
+            board.black_pawn.clone(),
+            board.black_knight.clone(),
+            board.black_bishop.clone(),
+            board.black_rook.clone(),
+            board.black_queen.clone(),
+            board.black_king.clone(),
+        ];
+
+        for piece in &pieces {
+            if piece.bitboard & Bitboard(1u64 << square) != 0 {
+                let c = match piece.kind {
+                    Kind::Pawn => 'p',
+                    Kind::Knight => 'n',
+                    Kind::Bishop => 'b',
+                    Kind::Rook => 'r',
+                    Kind::Queen => 'q',
+                    Kind::King => 'k',
+                };
+                return Some(match piece.color {
+                    Color::White => c.to_ascii_uppercase(),
+                    Color::Black => c,
+                });
+            }
+        }
+        None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_to_fen() {
+        let b = Board::from_fen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1")
+            .unwrap();
+        let s = b.to_fen();
+        assert_eq!(
+            s,
+            "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"
+        );
+    }
 }
