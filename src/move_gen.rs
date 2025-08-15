@@ -1488,6 +1488,24 @@ mod tests {
         assert_eq!(v.len(), n_move);
     }
 
+    fn perft(board: &Board, depth: u32) -> u64 {
+        if depth == 0 {
+            return 1;
+        }
+
+        let mut nodes = 0;
+        let mut movegen = MoveGen::new(board);
+
+        movegen.gen_legal_moves();
+        for mv in movegen.get_legal_moves() {
+            let mut new_board = board.clone();
+            new_board.do_move(mv);
+            nodes += perft(&new_board, depth - 1);
+        }
+
+        nodes
+    }
+
     #[test]
     fn test_king_center() {
         wrapper("k7/8/8/8/3K4/8/8/8 w - - 0 1", 8);
@@ -1555,6 +1573,7 @@ mod tests {
     fn test_white_pawn_enpassant_1() {
         wrapper("k7/8/8/4Pp2/8/8/8/K7 w - f6 0 1", 5);
     }
+
     #[test]
     fn test_white_pawn_enpassant_2() {
         wrapper("k7/8/8/3pP3/8/8/8/K7 w - d6 0 1", 5);
@@ -1564,10 +1583,12 @@ mod tests {
     fn test_white_pawn_promotion() {
         wrapper("k7/4P3/8/8/8/8/8/K7 w - - 0 1", 7);
     }
+
     #[test]
     fn test_white_pawn_promotion_blocked() {
         wrapper("k3p3/4P3/8/8/8/8/8/K7 w HAha - 0 1", 3);
     }
+
     #[test]
     fn test_white_pawn_promotion_attack() {
         wrapper("k4p2/4P3/8/8/8/8/8/K7 w HAha - 0 1", 11);
@@ -1587,6 +1608,7 @@ mod tests {
     fn test_black_pawn_double_push_opposition() {
         wrapper("k7/4p3/8/4P3/8/8/8/K7 b HAha - 0 1", 4);
     }
+
     #[test]
     fn test_black_pawn_single_push_opposition() {
         wrapper("k7/8/4p3/4P3/8/8/8/K7 b - - 0 1", 3);
@@ -1606,6 +1628,7 @@ mod tests {
     fn test_black_pawn_enpassant_1() {
         wrapper("k7/8/8/8/3Pp3/8/8/K7 b - d3 0 1", 5);
     }
+
     #[test]
     fn test_black_pawn_enpassant_2() {
         wrapper("k7/8/8/8/4pP2/8/8/K7 b - f3 0 1", 5);
@@ -1615,10 +1638,12 @@ mod tests {
     fn test_black_pawn_promotion() {
         wrapper("k7/8/8/8/8/8/5p2/K7 b - - 0 1", 7);
     }
+
     #[test]
     fn test_black_pawn_promotion_blocked() {
         wrapper("k7/8/8/8/8/8/5p2/K4R2 b - - 0 1", 3);
     }
+
     #[test]
     fn test_black_pawn_promotion_attack() {
         wrapper("k7/8/8/8/8/8/5p2/K5R1 b HAha - 0 1", 11);
@@ -1717,5 +1742,49 @@ mod tests {
     #[test]
     fn test_check_mate() {
         wrapper("k6b/Q7/8/8/8/8/8/R3K3 b Q - 0 1", 0);
+    }
+
+    #[test]
+    fn test_perft1() {
+        let b = Board::default();
+        let p = perft(&b, 6);
+        assert_eq!(p, 119_060_324);
+    }
+    #[test]
+    fn test_perft2() {
+        let b =
+            Board::from_fen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ")
+                .unwrap();
+        let p = perft(&b, 5);
+        assert_eq!(p, 193_690_690);
+    }
+    #[test]
+    fn test_perft3() {
+        let b = Board::from_fen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1").unwrap();
+        let p = perft(&b, 6);
+        assert_eq!(p, 11_030_083);
+    }
+    #[test]
+    fn test_perft4() {
+        let b = Board::from_fen("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1")
+            .unwrap();
+        let p = perft(&b, 6);
+        assert_eq!(p, 706_045_033);
+    }
+    #[test]
+    fn test_perft5() {
+        let b =
+            Board::from_fen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8").unwrap();
+        let p = perft(&b, 5);
+        assert_eq!(p, 89_941_194);
+    }
+    #[test]
+    fn test_perft6() {
+        let b = Board::from_fen(
+            "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
+        )
+        .unwrap();
+        let p = perft(&b, 5);
+        assert_eq!(p, 164_075_551);
     }
 }
