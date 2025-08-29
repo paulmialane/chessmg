@@ -3,8 +3,11 @@ use crate::board::Board;
 use crate::magic::{
     generate_bishop_attack_mask, generate_rook_attack_mask, BISHOP_MAGICS, ROOK_MAGICS,
 };
-use crate::utils::{square_mask, Color, Kind, Square, CLEAR_FILE, CLEAR_RANK, MASK_RANK};
+use crate::utils::{
+    square_mask, Casteling, Color, Kind, Square, CLEAR_FILE, CLEAR_RANK, MASK_RANK,
+};
 
+#[derive(Clone)]
 pub struct Move {
     pub piece_kind: Kind,
     pub piece_color: Color,
@@ -15,6 +18,14 @@ pub struct Move {
     pub double_push: bool,
     pub en_passant: bool,
     pub captured_piece: Option<Kind>,
+}
+
+#[derive(Clone)]
+pub struct Undo {
+    pub captured_piece: Option<(Kind, Color, Square)>,
+    pub castling_rights: Casteling,
+    pub en_passant: Option<Square>,
+    pub to_move: Color,
 }
 
 impl Move {
@@ -43,7 +54,7 @@ impl Move {
             let (file, rank) = square.to_coords(); // (0..7, 0..7)
             let file_char = (b'a' + file) as char;
             let rank_char = (b'1' + rank) as char;
-            format!("{}{}", file_char, rank_char)
+            format!("{file_char}{rank_char}")
         }
 
         fn kind_to_uci_char(kind: Kind) -> char {

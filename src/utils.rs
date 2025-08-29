@@ -10,6 +10,16 @@ pub enum Color {
     Black,
 }
 
+impl Color {
+    #[must_use]
+    pub fn opposite(&self) -> Self {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq)]
 pub enum Kind {
     Pawn,

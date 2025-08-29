@@ -1,7 +1,7 @@
 use crate::bitboard::Bitboard;
 use crate::errors::ChessMgError;
 use crate::errors::ChessMgError::InvalidFEN;
-use crate::move_gen::{Move, MoveGen};
+use crate::move_gen::{Move, MoveGen, Undo};
 use crate::piece::Piece;
 use crate::utils::{square_mask, Casteling, Color, Kind, Square};
 use std::fmt;
@@ -33,6 +33,9 @@ pub struct Board {
 
     // Is there a `En Passant` square
     pub en_passant: Option<Square>,
+
+    // Undo stack to allow efficient search
+    pub undo_stack: Vec<Undo>,
 }
 
 impl Default for Board {
@@ -53,6 +56,7 @@ impl Default for Board {
             black_king: Piece::create_initial(Kind::King, Color::Black),
             casteling_rights: Casteling::default(),
             en_passant: None,
+            undo_stack: Vec::with_capacity(500),
         }
     }
 }
@@ -184,6 +188,8 @@ impl Board {
             },
 
             en_passant: None,
+
+            undo_stack: Vec::with_capacity(500),
         }
     }
 
@@ -276,6 +282,18 @@ impl Board {
     #[allow(clippy::missing_panics_doc, reason = "It is not suppose to panic")]
     #[allow(clippy::too_many_lines)]
     pub fn do_move(&mut self, m: &Move) {
+        // Push on the stack to keep track of the rights for undo_move
+        let undo = Undo {
+            captured_piece: m
+                .captured_piece
+                .map(|kind| (kind, m.piece_color.opposite(), m.to)),
+            castling_rights: self.casteling_rights.clone(),
+            en_passant: self.en_passant,
+            to_move: self.to_move,
+        };
+
+        self.undo_stack.push(undo);
+
         // Determine the piece to modify
         let piece = match (m.piece_kind, m.piece_color) {
             (Kind::Pawn, Color::White) => &mut self.white_pawn,
@@ -449,6 +467,97 @@ impl Board {
         self.to_move = match self.to_move {
             Color::White => Color::Black,
             Color::Black => Color::White,
+        }
+    }
+
+    pub fn undo_move(&mut self, m: &Move) {
+        let undo = self.undo_stack.pop().expect("Undo stack underflow");
+
+        self.casteling_rights = undo.castling_rights;
+        self.en_passant = undo.en_passant;
+        self.to_move = undo.to_move;
+
+        // Remove moved piece from destination, put it back on origin
+        let piece = match (m.piece_kind, m.piece_color) {
+            (Kind::Pawn, Color::White) => &mut self.white_pawn,
+            (Kind::King, Color::White) => &mut self.white_king,
+            (Kind::Bishop, Color::White) => &mut self.white_bishop,
+            (Kind::Knight, Color::White) => &mut self.white_knight,
+            (Kind::Rook, Color::White) => &mut self.white_rook,
+            (Kind::Queen, Color::White) => &mut self.white_queen,
+            (Kind::Pawn, Color::Black) => &mut self.black_pawn,
+            (Kind::King, Color::Black) => &mut self.black_king,
+            (Kind::Bishop, Color::Black) => &mut self.black_bishop,
+            (Kind::Knight, Color::Black) => &mut self.black_knight,
+            (Kind::Rook, Color::Black) => &mut self.black_rook,
+            (Kind::Queen, Color::Black) => &mut self.black_queen,
+        };
+        piece.bitboard = piece.bitboard & !square_mask(m.to);
+        piece.bitboard = piece.bitboard | square_mask(m.from);
+
+        // Handle promotion
+        if let Some(prom) = m.promoting_piece {
+            let promoted_piece = match (prom, m.piece_color) {
+                (Kind::Pawn, Color::White) => &mut self.white_pawn,
+                (Kind::King, Color::White) => &mut self.white_king,
+                (Kind::Bishop, Color::White) => &mut self.white_bishop,
+                (Kind::Knight, Color::White) => &mut self.white_knight,
+                (Kind::Rook, Color::White) => &mut self.white_rook,
+                (Kind::Queen, Color::White) => &mut self.white_queen,
+
+                (Kind::Pawn, Color::Black) => &mut self.black_pawn,
+                (Kind::King, Color::Black) => &mut self.black_king,
+                (Kind::Bishop, Color::Black) => &mut self.black_bishop,
+                (Kind::Knight, Color::Black) => &mut self.black_knight,
+                (Kind::Rook, Color::Black) => &mut self.black_rook,
+                (Kind::Queen, Color::Black) => &mut self.black_queen,
+            };
+
+            promoted_piece.bitboard = promoted_piece.bitboard & !square_mask(m.to);
+        }
+
+        // Restore captured piece if there was one
+        if let Some((kind, color, square)) = undo.captured_piece {
+            let enemy_piece = match (kind, color) {
+                (Kind::Pawn, Color::White) => &mut self.white_pawn,
+                (Kind::King, Color::White) => &mut self.white_king,
+                (Kind::Bishop, Color::White) => &mut self.white_bishop,
+                (Kind::Knight, Color::White) => &mut self.white_knight,
+                (Kind::Rook, Color::White) => &mut self.white_rook,
+                (Kind::Queen, Color::White) => &mut self.white_queen,
+                (Kind::Pawn, Color::Black) => &mut self.black_pawn,
+                (Kind::King, Color::Black) => &mut self.black_king,
+                (Kind::Bishop, Color::Black) => &mut self.black_bishop,
+                (Kind::Knight, Color::Black) => &mut self.black_knight,
+                (Kind::Rook, Color::Black) => &mut self.black_rook,
+                (Kind::Queen, Color::Black) => &mut self.black_queen,
+            };
+            enemy_piece.bitboard = enemy_piece.bitboard | square_mask(square);
+        }
+
+        // Handle castling (rook movement back)
+        if m.casteling {
+            match m.to {
+                Square::G1 => {
+                    // white king side
+                    self.white_rook.bitboard = self.white_rook.bitboard & !square_mask(Square::F1);
+                    self.white_rook.bitboard = self.white_rook.bitboard | square_mask(Square::H1);
+                }
+                Square::C1 => {
+                    // white queen side
+                    self.white_rook.bitboard = self.white_rook.bitboard & square_mask(Square::D1);
+                    self.white_rook.bitboard = self.white_rook.bitboard | square_mask(Square::A1);
+                }
+                Square::G8 => {
+                    self.black_rook.bitboard = self.black_rook.bitboard & !square_mask(Square::F8);
+                    self.black_rook.bitboard = self.black_rook.bitboard | square_mask(Square::H8);
+                }
+                Square::C8 => {
+                    self.black_rook.bitboard = self.black_rook.bitboard & !square_mask(Square::D8);
+                    self.black_rook.bitboard = self.black_rook.bitboard | square_mask(Square::A8);
+                }
+                _ => {}
+            }
         }
     }
 
