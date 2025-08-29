@@ -840,6 +840,11 @@ impl Square {
             Square::H8 => "h8",
         }
     }
+
+    pub fn to_coords(self) -> (u8, u8) {
+        let idx = self as u8; // relies on enum order A1=0,...H8=63
+        (idx % 8, idx / 8)
+    }
 }
 
 #[allow(clippy::struct_excessive_bools, reason = "I now what I do")]

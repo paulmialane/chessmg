@@ -37,6 +37,35 @@ impl Move {
         println!("  a b c d e f g h");
         print!("");
     }
+
+    pub fn to_string(&self) -> String {
+        fn square_to_str(square: Square) -> String {
+            let (file, rank) = square.to_coords(); // (0..7, 0..7)
+            let file_char = (b'a' + file) as char;
+            let rank_char = (b'1' + rank) as char;
+            format!("{}{}", file_char, rank_char)
+        }
+
+        fn kind_to_uci_char(kind: Kind) -> char {
+            match kind {
+                Kind::Queen => 'q',
+                Kind::Rook => 'r',
+                Kind::Bishop => 'b',
+                Kind::Knight => 'n',
+                _ => panic!("Invalid promotion piece for UCI"),
+            }
+        }
+
+        let mut s = String::new();
+        s.push_str(&square_to_str(self.from));
+        s.push_str(&square_to_str(self.to));
+
+        if let Some(prom) = self.promoting_piece {
+            s.push(kind_to_uci_char(prom));
+        }
+
+        s
+    }
 }
 
 pub struct MoveGen<'a> {
